@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book
+PUBLIC "-//OASIS//DTD DocBook XML V4.5/zh_cn" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
+[
+<!ENTITY section_25 SYSTEM "bootbus.xml">
+]>
+<book>
+    <info>
+        <title>
+            Cavium OCTEON II CN68XX, Pass 2 硬件参考手册
+        </title>
+        <author>nicephil</author>
+        <address>nicephil@gmail.com</address>
+        <copyright>
+            <year>2012</year>
+            <holder>nicephil</holder>
+        </copyright>
+    </info>
+
+
+        <chapter>
+            <title>
+                介绍
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                cnMIPS II Cores
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Coherent Memory Interconnect and Level-2 Cache Controller
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                DRAM Controller (LMC)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                I/O Interconnect (IOI), I/O Bridge (IOB) and Fetch and Add Unit (FAU)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Trace Control Unit (TRA)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Schedule/Synchronize/Order Unit (SSO)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Free Pool Unit (FPA)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Packet Input Processing/Input Packet Data Unit (PIP/IPD)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Packet-Output Processing Unit (PKO)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Hyper Finite Automata (HFA)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                DMA Packet Interface Unit (DPI) and Switch Logic Interface Unit (SLI)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Central Interrupt Unit (CIU)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Precision Time Protocol (PTP) Clocks and Timestamping
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Timer Unit (TIM)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Random-Number Generator (RNG), Random-Number Memory (RNM)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                ZIP Compression/Decompression Coprocessor
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                RAID Unit (RAD)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Key Memory Unit (KEY)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                PCI Express Interface (PEM)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Interlaken (ILK) Interface
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                SGMII/1000BASE-X Interface
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                10 Gigabit Ethernet Attachment Unit Interface (XAUI)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                MIX Interface for GRMII/MII
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Boot Bus
+            </title>
+            &section_25;
+        </chapter>
+
+        <chapter>
+            <title>
+                NAND Flash Interface Unit
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Universal Serial Bus Unit (USB)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                System Management Interface (SMI)
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                GPIO Unit
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                UART Interface
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                TWSI Interface
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Eletrical Specifications
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                AC Characteristics
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Mechanical Specification
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                CN68XX Signal Descriptions
+            </title>
+        </chapter>
+
+        <chapter>
+            <title>
+                Ball Assignments
+            </title>
+        </chapter>
+
+        <appendix>
+            <title>
+                Cavium-Specific Core Instructions
+            </title>
+        </appendix>
+
+        <appendix>
+            <title>
+                Ordering Information
+            </title>
+        </appendix>
+</book>

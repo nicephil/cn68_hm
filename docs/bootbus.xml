@@ -1,0 +1,33 @@
+<para>  
+    这个章节包含如下内容：
+    <itemizedlist>
+        <listitem>综述</listitem>
+        <listitem>地址</listitem>
+        <listitem>地址匹配和区域</listitem>
+        <listitem>重启配置和引导</listitem>
+        <listitem>区域时序</listitem>
+        <listitem>DMA引擎编程</listitem>
+        <listitem>DMA引擎时序</listitem>
+        <listitem>请求队列</listitem>
+        <listitem>连接</listitem>
+        <listitem>操作</listitem>
+        <listitem>启动总线寄存器</listitem>
+    </itemizedlist>
+</para>
+<sect1>
+    <title>综述</title>
+    <para>
+        CN68XX的boot-bus提供了通用目的总线特别是连接非易失设别，比如flash内存（NOR，NAND），
+        CF内存，和ROM，并且能服务于CN68XX起始启动地址。这个总线协议比较灵活，因此它也能作为接口到
+        其它类型设备。直接连接NAND flash内存的接口描述在第26章。
+    </para>
+    <para>
+        大端启动总线包含：
+        <itemizedlist>
+            <listitem>8个片选</listitem>
+            <listitem>32位地址和数据线</listitem>
+            <listitem>可编程8/16位数据宽度</listitem>
+            <listitem>两个多字DMA DMARQ/DMACK信号带专用DMA引擎和更快速度</listitem>
+        </itemizedlist>
+    </para>
+</sect1>
