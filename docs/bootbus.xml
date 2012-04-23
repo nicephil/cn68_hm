@@ -30,4 +30,114 @@
             <listitem>两个多字DMA DMARQ/DMACK信号带专用DMA引擎和更快速度</listitem>
         </itemizedlist>
     </para>
+    <figure> 
+        <title>Boot-Bus硬件</title>
+        <imagedata fileref="images/a.png"/>
+    </figure>
+    <para>
+        boot-bus硬件能配置多达8个区域对应8各片选信号。每个区域/片选有不同的总线设置和时序参数。
+        当CN68XX自启动（例如当外部引脚REMOTE_BOOT=0时），boot bus必须提供启动指令来驱动芯片在
+        片选0上。
+    </para>
+    <para>
+        boot-bus硬件也包含两个本地128字节内存区域。这些内存区域必须被用来服务于核启动和调试异常向量
+        引用当没有设备连接上boot bus将服务于他们。本地内存区域也能加速读取操作来通用的存取boot bus区域。
+    </para>
+    <para>
+        远程PCIe主机也能用boot bus。boot-bus硬件服务于所有PCIe扩展ROM引用。和所有引用到boot-bus物理地址
+        通过PCIe窗口地址机制。（远程PCIe主机访问SLI_WIN_WR_ADDR，SLI_WIN_RD_ADDR，SLI_WIN_WR_DATA，SLI_WIN_WR_MASK
+        和SLI_WIN_RD_DATA寄存器来使用PCI窗口的地址机制。
+    </para>
+    <para>
+        CN68XX包含两个MWDMA DMARQ/DMACK外部引脚双绞一起带两个专用内部DMA引擎。CN68XX实现MWDMA模式兼容
+        IT - AT附加包接口- 5（ATA/ATAPI-5）和CF+和CF规约。CN68XX也能实现更快模式并能增加总线宽度
+        到32位并运行双数据速率。
+    </para>
+</sect1>
+<sect1>
+    <title>地址</title>
+    <para>
+        boot bus消耗4GB CN68XX物理地址空间从0x1 0000 0000 0000到0x1 0000 FFFF FFFF.
+    </para>
+    <note>
+        CN68XX核页转换所有他们的物理地址0x0 0000 1000 0000到0x0 0000 1FFF FFF到boot-bus物理地址区域
+        0x1 0000 1000 0000到0x1 0000 1FFF FFFF. 
+    </note>
+    <para>
+        boot-bus物理地址如表, 作为核的异常向量表
+    </para>
+    <table>
+        <title>异常向量表</title>
+        <tgroup cols="2">
+        <tbody>
+            <row>
+                <entry>向量地址(PA)</entry>
+                <entry>表述</entry>
+            </row>
+            <row>
+                <entry>0x1 0000 1FC0 0000</entry>
+                <entry>一个核向量的物理地址在所有重启，软重启，或非屏蔽中断（NMI）异常后</entry>
+            </row>
+            <row>
+                <entry>0x1 0000 1FC0 0480</entry>
+                <entry>如果EJTAG TAP的ECR[ProbEn]没有设置，一个核向量的物理地址在所有调试异常后</entry>
+            </row>
+        </tbody>
+        </tgroup>
+    </table>
+    <para>
+        其它核异常页能向量到boot-bus地址在一些特定情况下。这些异常向量能通过配置来避免如果需要（通过清除
+        核CP0寄存器的Status[BEV]，但是向量地址在表中的不能通过核配置避免。
+    </para>
+    <para>
+        如果系统没有任何设备连接到boot bus，两个本地内存区域在boot-bus硬件必须服务于（指令取）读操作后面
+        立即跟随异常例如在表中。在这个一个系下，CN68XX不能自启动（例如外部REMOTE_BOOT引脚必须置1）。每个
+        本地内存区域能保留多达32指令在自己的向量地址。异常处理函数必须L2/DRAM在这些32指令。
+    </para>
+    <para>
+        boot-bus地址区域在表中:
+    </para>
+    <table>
+        <title>PCIe扩展ROM地址区域</title>
+        <tgroup cols="2">
+            <tbody>
+                <row>
+                    <entry>地址区域</entry>
+                    <entry>表述</entry>
+                </row>
+                <row>
+                    <entry>0x1 0000 1FC1 0000到0x1 0000 1FC1 FFFF</entry>
+                    <entry>64KB物理地址区域被PCIe扩展ROM引用。</entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+</sect1>
+<sect1>
+    <title>地址匹配和区域</title>
+    <para>
+        boot-bus硬件只服务于boot-bus引用被匹配他们的PA带编程区域。对于读操作，硬件搜线检查匹配与本地
+        内存区域。如果读PA匹配两个本地内存区域中的一个，硬件服务于读在内存的数据在单元内。
+        否则（例如，对于任意读操作或对于一个读操作不能命中在一个本地内存区域）。boot-bus硬件检查一个命中
+        匹配PA写在bus区域。在一个匹配，硬件使用区域（他的对应的片选和时序参数）来完成引用。
+    </para>
+    <para>
+        两个本地内存区域使能，当对应的MIO_BOOT_LOC_CFGn[EN]被设置。每个本地内存区域是128字节当使能，并
+        匹配当PA&lt;31:7&gt;中的读PA等于MIO_BOOT_LOC_CFGn[BASE]。
+    </para>
+    <para>
+        每个本地内存区域的存储被c保持在boot-bus逻辑里，必须被软件填充在本地内存区域使能。软件必须填写本地
+        内存区域0通过执行如下步骤：
+    </para>
+    <orderedlist>
+        <listitem>设置MIO_BOOT_LOC_ADR为0（设置0x80为本地内存区域1）。</listitem>
+        <listitem>写MIO_BOOT_LOC_DAT 16次带8字节每次。8个总线区域被使能当对应MIO_BOOT_REG_CFGn[EN]被设置
+            每个使能区域的字节大小内：(MIO_BOOT_REG_CFGn[SIZE]+1)x2<superscript>16</superscript>一个boot-bus
+        读或写操作匹配一个使能总线区域当如下条件都满足：</listitem>
+    <para>
+        PA&lt;31:16&gt; &gt;= MIO_BOOT_REG_CFGn[BASE], AND PA&lt;31:16&gt; &lt;= MIO_BOOT_REG_CFGn[BASE] +
+        MIO_BOOT_rEG_CFGn[SIZE]
+    </para>
+    </orderedlist>
+
 </sect1>
