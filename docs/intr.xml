@@ -1,0 +1,180 @@
+OCTEON II CN68XX多核MIPS64处理器体系特性：
+<itemizedlist>
+    <listitem>高集成网络安全/应用处理器</listitem>
+    <listitem>MIPS64整型指令集，高可编程性</listitem>
+    <listitem>多控制层面和数据层面支持多控制</listitem>
+    <listitem>独立体系如自启动或设备支持</listitem>
+    <listitem>核频率达到1.5GHz</listitem>
+    <listitem></listitem>
+    <listitem></listitem>
+    <listitem></listitem>
+    <listitem></listitem>
+</itemizedlist>
+
+<para>
+所有CN68XX体系成员使用相同的cnMIPS II CPU核和线同片上体系。cnMIPSII核，是增强型高性能标准MIPS64整型指令集带额外网络和
+无线加速指令的双发射实现。CN68XX硬件保护所有片上硬件单元在所有体系成员同样软件接口。
+</para>
+<para>
+图片 1-1 显示CN68XX芯片的块图表。左边芯片的块例如CPU核，一致性内存内部连接（CMI），2级缓存（L2C）块，和DRAM控制器
+（LMC）实现一个片上多处理器和一致性共享内存系统。右边包含I/O内部连接（IOI）和I/O接口块带可配置I/O和协同处理硬件加速器块。这些两边通过高性能I/O桥（IOB)，创建一个片上系统有利于包处理，网络，存储和安全应用。
+</para>
+<para>
+    体系是可伸缩体系包含性能和I/O配置。CN68XX体系成员支持如下工业标准I/O接口：DDR3 DRAM，PCI Express 2.0, ILK, SGMII， XAUI，RXAUI，UART， JTARG（IEEEE 1149.1），和AC-JTAG（IEEEE 1149.6）。CN68XX也实现一个启动总线接口，它能支持NOR或NAND FLASH设备。
+</para>
+<figure>
+    <imagedata fileref="images/cn68xx_1.png"/>
+</figure>
+图片 1-2 描述了CN68XX全部引脚。OCTEON II体系成员在CPU核数目，内部缓存和单元大小，和I/O接口的数目有点不同。
+<figure>
+    <imagedata fileref="images/cn68xx_2.png"/>
+</figure>
+
+<sect1>
+    <title>CN68XX时钟</title>
+    CN68XX有一个单个引用时钟信号（PLL_REF_CLK）给三个PLLs（核PLL，协处理器PLL，DDR PLL），提供时钟信号给芯片的其它部分。每个PLL有他自己的PLL_REF_CLK多路复用集合，允许每个产生他们自己的频率。核PLL产生核核时钟（RClK），他被cnMIPS II核，CMI，L2C，和TRA。软件可以通过读取MIO_RST_BOOT[C_MUL]通过如下公式决定核时钟速度：
+    <para>
+        核时钟频率=PLL_REF_CLK x [C_MUL] = 50MHz x [C-MUL]
+        <note>C_MUL页等于6 + PLL_MUL_&lt;4:0&gt;的值</note>
+    </para>
+    协处理器PLL产生协处理器时钟（SCLK）。他被协处理器的其它和I/O接口使用。可以通过读MIO_RST_BOOT[PNR_MUL]通过公式计算：
+    <para>
+        协处理器时钟频率 = PLL_REF_CLK x [PNR_MUL] = 50MHz x [PNR_MUL]
+        <note>PNR_MUL等于6 + SYS_PLL_MUL_&lt;4:0&gt;</note>
+    </para>
+    DDR PLL产生给LMC和HMC时钟信号，每个都有自己的差分器（LMCn_DDR_PLL_CTR）。
+    <para>
+    </para>
+    图 1-3 表述CN68XX时钟方案
+    <figure>
+        <imagedata fileref="images/cn68xx_3.png"/>
+    </figure>
+</sect1>
+
+<sect1>
+    <title>处理原则</title>
+    <sect2>
+        <title>CPU核</title>
+        CN68XX CPU核全功能高性能MIPS64整型实现。直接支持工业标准C/C++编程环境。
+        <para>
+            包含所有必须需求，包含TLBs，引导和运行全功能操作系统。
+        </para>
+        <para>
+            允许CN68XX丰富特性，也基本上简单化编程任务。有高性能需要给数据层面应用，页避免代码/数据大小限制。
+        </para>
+        <para>
+            CN68XX包含很多除了标准MIPS64整型指令集外的核指令，来加速包处理，安全处理和内存/缓存处理。
+        </para>
+    </sect2>
+    <sect2>
+        <title>一致性多核和I/O L2/DRAM共享</title>
+        共享主要内存通过L2缓存和DRAM实现是主要沟通媒体给块传输在CN68XX。I/O和协处理器设备DMA包和其它数据进出内存。
+        <para>
+            L2缓存被所有CPU核指令/数据和硬件设备DMA存取共享。L2缓存可以被分区，并能通过基本引用到引用绕过。I/O设备能直接DMA数据到L2缓存。
+        </para>
+    </sect2>
+    <sect2>
+        <title>核分区</title>
+        软件和芯片配置能分区核，来执行不同功能。例如一些核运行操作系统，同时其它执行数据层面功能，或者不同核执行数据层面服务的不同部分。
+    </sect2>
+    <sect2>
+        <title>弹性包/控制接口</title>
+        包和控制信息能进出CN68XX通过SGMII/XAUI,RXAUI,ILK,或PCIe接口。内部Cn68XX支持5个SerDes（QLMs）给20SERDES通道。
+    </sect2>
+    <sect2>
+        <title>线上包处理硬件加速器</title>
+        CN68XX减载核当所有数据移动，很多通用包解析功能和其它重要计算。
+        CN68XX线上包处理硬件单元完成如下任务在核接收一个包之前：
+        <itemizedlist>
+            <listitem>申请一个DRAM缓冲来保存包字节</listitem>
+            <listitem>发送包数据到这些DRAM缓冲中通过DMA操作使用一个标准与高层软件通信。这个能启动复制释放核软件</listitem>
+            <listitem>分析二层和三层/IP包，检查常用异常条件，对于每个进入包已经完成，四层TCP/UDP校验检查也被包含，还有其它。</listitem>
+            <listitem>执行可选互斥排除通过可编程7元组分类</listitem>
+        </itemizedlist>
+        当软件完成包处理后，CN68XX线上硬件执行如下任务：
+        <itemizedlist>
+            <listitem>DMA包发送命令到被选择的输出队列，并释放可用队列空间</listitem>
+            <listitem>DMA包数据从L2/DRAM. 这个包含多个模式来收集不连续包数据</listitem>
+            <listitem>产生TCP/UDP校验。（CN68XX能非常有效的执行这些;包数据被从L2/DRAM读出只一次来计算校验并发送包出去）</listitem>
+            <listitem>释放DMA缓冲</listitem>
+        </itemizedlist>
+    </sect2>
+    <sect2>
+        <title>硬件协助的动态内存分配和释放</title>
+        CN68XX包含空闲池，包含指向可用包缓冲的指针，硬件能自动申请和释放包缓冲。
+    </sect2>
+    <sect2>
+        <title>硬件工作队列，调度，排序和同步</title>
+        CN68XX硬件维护一个工作队列在一个片上硬件单元。它提供了主要片上通信机制在核和CN68XX硬件单元。
+    </sect2>
+    <sect2>
+        <title>基本质量服务（QoS）功能实现在硬件</title>
+       CN68XX有一些基本QoS功能直接实现在硬件中：
+       <itemizedlist>
+           <listitem>硬件有8个分别输入工作队列</listitem>
+           <listitem>线上输入包处理硬件能分类包到其中一个队列使用缺省值，DSA/VLAN优先级和IP Diffserv值基于每个端口缺省值。系统能直接选择工作对列在每个包基础上</listitem>
+           <listitem></listitem>
+           <listitem></listitem>
+           <listitem></listitem>
+           <listitem></listitem>
+           <listitem></listitem>
+       </itemizedlist>
+    </sect2>
+    <sect2>
+        <title>安全特性</title>
+    </sect2>
+    <sect2>
+        <title>协处理器加速器</title>
+    </sect2>
+    <sect2>
+        <title>调试支持</title>
+    </sect2>
+</sect1>
+<sect1>
+    <title>剩余章节</title>
+</sect1>
+<sect1>
+    <title>配置和状态寄存器(CSRs)</title>
+    CN68XX有很多CSRs来控制和配置片上硬件。每个配置寄存器能通过一个或多个以下机制访问：
+    <itemizedlist>
+        <listitem>核使用MFC0/MTCO指令</listitem>
+        <listitem>核使用MFC2/MTC2指令</listitem>
+        <listitem>核使用普通加载/存储指令到I/O物理地址</listitem>
+        <listitem>核使用间接窗口化访问PCIe配置寄存器通过PEM*_CFG_WR和PEM*_CFG_RD CSRs</listitem>
+        <listitem>远程EJTAG/JTAG设备使用EJTAG/JTAG TAP接口</listitem>
+        <listitem>远程PCIe主机使用直接PCIe配置访问维护访问</listitem>
+        <listitem>远程主机使用直接PCIe内存空间BAR0访问</listitem>
+        <listitem>远程PCIe主机使用间接窗口化访问I/O物理地址通过SLI_WIN_RD_ADDR, SLI_WIN_RD_DATA, SLI_WIN_WR_ADDR, SLI_WIN_WR_DATA, SLI_WIN_WR_MASK CSRs</listitem>
+    </itemizedlist>
+    这些配置寄存器有如下分类：
+    <itemizedlist>
+        <listitem>核协处理器0（CP0）寄存器。这些CSRs被复制到每个核，只能通过运行在本地核的软件访问，CP0 CSRs能被通过L2C_COP0_MAP*访问</listitem>
+        <listitem>核协处理器2（CP2）寄存器。这些CSRs被复制到每个核，只能通过运行在本地核的软件访问。</listitem>
+        <listitem>核EJTAG寄存器。这些CSRs被复制到每个核，只能被运行在本地核的软件访问.所有CN68XX核EJTAG寄存器是64位，必须64位对齐访问。</listitem>
+        <listitem>核EJTAG TAP寄存器。这些CSRs被复制到每个核，并只能被一个外部EJTAG设备通过Cn68XX的EJTAG接口访问。</listitem>
+        <listitem>NCB寄存器。这些寄存器直接在IOI访问。这些寄存器能被任何核和远程PCIe设备/主机通过窗口化机制通过BAR0访问。每个NCB寄存器有一个CN68XX内部地址。所有CN68XX NCB寄存器是64或32位。</listitem>
+        <listitem>RSL寄存器。和NCB寄存器相似，只是访问慢，因为它是间接访问。所有CN68XX RSL寄存器都是64位</listitem>
+        <listitem>PCICONFIGEP0/1 PCICONFIGRC0/1寄存器, 通过PEM0/1_CFG_RD访问，所有PCIe配置寄存器是32位</listitem>
+        <listitem>PEXP寄存器。只能从PCIe总线直接访问，不能被本地核访问。通过BAR0访问</listitem>
+        <listitem>PEXP_NCB寄存器，能被PCIe总线和IOI访问</listitem>
+        <listitem>JTAG TAP寄存器。只能被外部设备通过JTAG接口访问</listitem>
+        <listitem>TWSI核寄存器，控制TWSI核，只能间接通过MIO_TWS_SW_TWSI访问</listitem>
+    </itemizedlist>
+    CN68XX有不同CSR域类型：
+    <itemizedlist>
+        <listitem>R/W - 域能读和写</listitem>
+        <listitem>RO - 只能读</listitem>
+        <listitem>WO - 只能写，读一个WO域返回不可预测数据</listitem>
+        <listitem>WR0 - 能写，但读时全0</listitem>
+        <listitem>RAZ - 保留</listitem>
+        <listitem>R/W1C - 能读，写1清除</listitem>
+        <listitem>RO/WRSL - 通过物理PCIe接口只读，如果通过PEM*_CFG_WR/PEM*_CFG_RD可读写</listitem>
+        <listitem>WORSL - 只能通过PEM*_CFG_WR写</listitem>
+        <listitem>RC - 当读时清除</listitem>
+        <listitem>RC/W - 当读写时清除</listitem>
+    </itemizedlist>
+</sect1>
+
+<sect1>
+    <title>PCIe设备标识</title>
+</sect1>

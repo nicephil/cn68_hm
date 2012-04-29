@@ -1,0 +1,38 @@
+这个章节描述了如下话题：
+<itemizedlist>
+    <listitem>Coherent Memory Bus (CMB)</listitem>
+    <listitem>Level-2 Cache Controller (L2C)</listitem>
+    <listitem>DRAM Controller (LMC)</listitem>
+    <listitem>L2C Registers</listitem>
+    <listitem>LMC Registers</listitem>
+</itemizedlist>
+<sect1>
+    <title>Coherent Memory Bus (CMB)</title>
+    <sect2>
+        <title>CMB综述</title>
+    </sect2>
+</sect1>
+<sect1>
+    <title>Level-2 Cache Controller (L2C)</title>
+    L2C包含CN68XX共享片上L2缓存。L2缓存包含如下标准：
+    <itemizedlist>
+        <listitem>4MB</listitem>
+        <listitem>16路集相连带128字节缓存块</listitem>
+        <listitem>写回</listitem>
+        <listitem>片上数据和SECDED ECC标签</listitem>
+    </itemizedlist>
+    L2缓存被所有核和I/O模块共享,虽然它能通过使用特定CMI事物被返回并且能被分区。
+    <sect2>
+        <title>L2 Tag and Data Units</title>
+        CN68XX的L2C包含4个标签和数据单元（TADs)，每个包含1MB的L2缓存。
+        <itemizedlist>
+            <listitem>CMI接口有384位给数据传输</listitem>
+            <listitem>本地内存控制(LMC)DRAM接口是256位宽</listitem>
+            <listitem>内部L2缓存数据接口256位宽在每个</listitem>
+            <listitem></listitem>
+            <listitem></listitem>
+            <listitem></listitem>
+            <listitem></listitem>
+        </itemizedlist>
+    </sect2>
+</sect1>

@@ -2,6 +2,9 @@
 <!DOCTYPE book
 PUBLIC "-//OASIS//DTD DocBook XML V4.5/zh_cn" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
 [
+<!ENTITY section_1 SYSTEM "intr.xml">
+<!ENTITY section_2 SYSTEM "cnmips.xml">
+<!ENTITY section_3 SYSTEM "memory.xml">
 <!ENTITY section_25 SYSTEM "bootbus.xml">
 ]>
 <book>
@@ -22,18 +25,21 @@ PUBLIC "-//OASIS//DTD DocBook XML V4.5/zh_cn" "http://www.oasis-open.org/docbook
             <title>
                 介绍
             </title>
+            &section_1;
         </chapter>
 
         <chapter>
             <title>
                 cnMIPS II Cores
             </title>
+            &section_2;
         </chapter>
 
         <chapter>
             <title>
                 Coherent Memory Interconnect and Level-2 Cache Controller
             </title>
+            &section_3;
         </chapter>
 
         <chapter>

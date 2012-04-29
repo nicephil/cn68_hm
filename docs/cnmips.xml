@@ -1,0 +1,50 @@
+可参考的标准MIPS出版物：
+<table>
+    <title>MIPS出版物</title>
+    <tgroup cols="2">
+        <tbody>
+            <row>
+                <entry>出版物</entry>
+                <entry>文档编号</entry>
+            </row>
+            <row>
+                <entry>EJTAG Specification, Revision 5.04, March 01, 2010</entry>
+                <entry>MD00047</entry>
+            </row>
+            <row>
+                <entry>MIPS64 Architecture For Programmers Volume I: Introduction to the MIPS64 Architecture, Revision 3.0, March 25, 2010</entry>
+                <entry>MD00083</entry>
+            </row>
+            <row>
+                <entry>MIPS64 Architecture For Programmers Volume II: The MIPS64 Instruction Set, Revision 3.0, March 25, 2010</entry>
+                <entry>MD00087</entry>
+            </row>
+            <row>
+                <entry>MIPS64 Architecture For Programmers Volume III: The MIPS64 Privileged Resource Architecture, Revision 3.05, July 7, 2010</entry>
+                <entry>MD00091</entry>
+            </row>
+        </tbody>
+    </tgroup>
+</table>
+    指令取回/译码操作在每个时钟周期内可有两个指令取回。高达两个指令能被发送在一个周期，每个周期一个分支/跳转预测。cnMIPS II核有8个项子例程返回调用栈和硬件指令预取和排队。
+<sect1>
+    <title>特性总结</title>
+</sect1>
+<sect1>
+    <title>核无特权状态</title>
+</sect1>
+<sect1>
+    <title>Cavium特定指令总结</title>
+</sect1>
+<sect1>
+    <title>指令集总结</title>
+</sect1>
+<sect1>
+    <title>虚拟地址和CVMSEG</title>
+    SEGBITS=49,如每个MIPS规范。当CvmMemCtl[CVMSEGENA*]被设置给适当的内核，管理（S）或用户模式（U)，虚拟地址给加载/存储操作在KSEG3区域0xFFFF FFFF FFFF 8000到0xFFFF FFFF FFFF BFFF被称为CVMSEG引用被特殊对待在cnMIPS II核。指令引用到这些地址总是被对待为KSEG3引用在核中。当CvmMemCtl[CVMSEGENA*]被清除为了适当模式，这些CVMSEG作为正常MIPS定义的KSEG3地址。CVMSEG包含两个部分：CVMSEG LM=0xFFFF FFFF FFFF 8000到0xFFFF FFFF FFFF 9FFFF， CVMSEG IO=0xFFFF FFFF FFFF A000到0xFFFF FFFF FFFF BFFF
+    <para>
+        CVMSEG LM访问部分Dcache像本地内存。
+    </para>
+</sect1>
+
+
