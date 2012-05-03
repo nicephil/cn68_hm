@@ -43,8 +43,182 @@
     <title>虚拟地址和CVMSEG</title>
     SEGBITS=49,如每个MIPS规范。当CvmMemCtl[CVMSEGENA*]被设置给适当的内核，管理（S）或用户模式（U)，虚拟地址给加载/存储操作在KSEG3区域0xFFFF FFFF FFFF 8000到0xFFFF FFFF FFFF BFFF被称为CVMSEG引用被特殊对待在cnMIPS II核。指令引用到这些地址总是被对待为KSEG3引用在核中。当CvmMemCtl[CVMSEGENA*]被清除为了适当模式，这些CVMSEG作为正常MIPS定义的KSEG3地址。CVMSEG包含两个部分：CVMSEG LM=0xFFFF FFFF FFFF 8000到0xFFFF FFFF FFFF 9FFFF， CVMSEG IO=0xFFFF FFFF FFFF A000到0xFFFF FFFF FFFF BFFF
     <para>
-        CVMSEG LM访问部分Dcache像本地内存。
+        CVMSEG LM访问部分Dcache像本地内存。大点CVMSEG，小点缓存。CvmMemCtl[LMEMSZ]选择CVMSEG LM的大小，在缓冲块。CvmMemCtl[LMEMSZ]能合法区域从0到54个缓冲块。合法CVMSEG LM从虚拟地址0xFFFF FFFF FFFF 8000开始，可能增加最大合法CVMSEG LM虚拟地址0xFFFF FFFF FFFF 9AFF。CVMSEG LM引用被CvmMemCtl[LMEMESZ]申请的区域上引起地址错误，不能保存这些非法地址可能被硬件停止，因此能引起缓存错误。
+    </para>
+    <para>
+        CVMSEG I/O是一个段只有一个合法地址不能给地址错误：0xFFFF FFFF FFFF A200，这个地址只能被SD指令引用。SD指令引起核硬件发出IOBDMA命令。IOBDMA命令返回IOI设备的数据到选择的CVMSEG LM地址。
     </para>
 </sect1>
-
+<sect1>
+    <title>物理地址</title>
+    图片 2-2 物理地址， 物理地址位（PABITS）是49,
+    <table>
+        <title>49位物理地址格式</title>
+        <tgroup cols="4">
+            <tbody>
+                <row>
+                    <entry>IO</entry>
+                    <entry>DID</entry>
+                    <entry>0 Reserved</entry>
+                    <entry>offset</entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+    <table>
+        <title>cnMIPS II核物理地址</title>
+        <tgroup cols="4">
+            <tbody>
+                <row>
+                    <entry>0x0 0000 0000 0000到0x0 0000 0FFF FFFF</entry>
+                    <entry>DR0 DRAM</entry>
+                    <entry>0x00</entry>
+                    <entry>带缓存的DRAM的第一个256MB</entry>
+                </row>
+                <row>
+                    <entry>0x0 0000 1000 0000到0x0 0000 1FFF FFFF</entry>
+                    <entry>Boot Bus</entry>
+                    <entry>0x00</entry>
+                    <entry>不带缓存的I/O空间。被转换到0x1 0000 1000 0000到0x1 0000 1FFFF FFFF</entry>
+                </row>
+                <row>
+                    <entry>0x0 0000 2000 0000到0x0 0020 0FFF FFFF</entry>
+                    <entry>DR1 DRAM</entry>
+                    <entry>0x00</entry>
+                    <entry>带缓存的(第一个256MB DRAM上的所有DRAM</entry>
+                </row>
+                <row>
+                    <entry>0x1 0000 0000 0000到0x1 0000 FFFF FFFF</entry>
+                    <entry>Boot Bus</entry>
+                    <entry>0x00</entry>
+                    <entry>不带缓存的（I/O空间）</entry>
+                </row>
+                <row>
+                    <entry>0x1 0700 0000 0000到0x1 0700 0000 6CD8</entry>
+                    <entry>GPIO, MIO PTP NCB类型CSRs</entry>
+                    <entry>0x07</entry>
+                    <entry>不带缓存的I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 0700 0010 0000到0x1 0710 0100</entry>
+                    <entry>MIX0 NCB类型CSR</entry>
+                    <entry>0x07</entry>
+                    <entry>不带缓存I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 0700 0100 0000到0x1 0700 0100 00A0</entry>
+                    <entry>NDF NCB类型CSRs</entry>
+                    <entry>0x07</entry>
+                    <entry>不带缓存I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 0701 0000 0000到0x1 0701 03FF FFFF</entry>
+                    <entry>CIU</entry>
+                    <entry>0x07</entry>
+                    <entry>不带缓存的I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 1800 0000 0000到0x1 1800 0000 3FFF</entry>
+                    <entry>MIO BOOT, RST, NDF, FUS, TWSI0, TWSI1, UART0, UART1, SMI RSL类型CSRs</entry>
+                    <entry>0x18</entry>
+                    <entry>不带缓存的I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 1800 0800 0000到0x1 1800 0800 1FFF</entry>
+                    <entry>GMX0 RSL类型CSRs</entry>
+                    <entry>0x18</entry>
+                    <entry>不带缓存的I/O空间</entry>
+                </row>
+                <row>
+                    <entry>0x1 1800 0900 0000到0x1 1800 0900 1FFF</entry>
+                    <entry>GMX1 RSL类型CSRs</entry>
+                    <entry>0x18</entry>
+                    <entry>不带缓存的I/O空间</entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+                <row>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                    <entry></entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+</sect1>
+<sect1>
+    <title>IOBDMA操作</title>
+</sect1>
+<sect1>
+    <title>核内存引用顺序</title>
+</sect1>
+<sect1>
+    <title>CSR顺序</title>
+</sect1>
+<sect1>
+    <title>Core Write Buffer</title>
+</sect1>
+<sect1>
+    <title>Cryptography</title>
+</sect1>
+<sect1>
+    <title>协处理器0特权</title>
+    MIPS CP0如下实现：128项TLB，SEGBITS = PABITS = 49。EJTAG被实现。CN68XX维护一个虚拟Icache。
+    <sect2>
+        <title>Cavium特定协处理器0寄存器</title>
+    </sect2>
+</sect1>
 

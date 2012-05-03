@@ -1,15 +1,43 @@
 这个章节描述了如下话题：
 <itemizedlist>
-    <listitem>Coherent Memory Bus (CMB)</listitem>
-    <listitem>Level-2 Cache Controller (L2C)</listitem>
-    <listitem>DRAM Controller (LMC)</listitem>
-    <listitem>L2C Registers</listitem>
-    <listitem>LMC Registers</listitem>
+    <listitem>一致性内存内部互联（CMI)</listitem>
+    <listitem>二级缓存控制器（L2C）</listitem>
+    <listitem>L2C寄存器</listitem>
 </itemizedlist>
 <sect1>
-    <title>Coherent Memory Bus (CMB)</title>
+    <title>一致性内存内部互联（CMI）</title>
     <sect2>
-        <title>CMB综述</title>
+        <title>CMI综述</title>
+        CMI如图3.1所示，有一个交叉横梁结构，它是所有内存和I/O事务的通信通道在32核，两个I/O桥和四个L2缓存的标签和数据单元（TADs），它构成了L2缓存。它运行在核时钟频率上。
+    </sect2>
+    <figure>
+        <title>一致性内存内部互联图表</title>
+        <imagedata fileref="images/cn68xx_4.png"/>
+    </figure>
+    <sect2>
+        <title>CMI交叉横梁内部互联</title>
+        CMI是个巨大的交叉横梁在十个不同的内部互联之间：
+        <itemizedlist>
+            <listitem>四个CMI ADD+STORE+COMMIT+FILL总线（引用为CMI集群0-3）他们连接到每8个核。CMI集群0和1页连接到两个IOBs</listitem>
+            <listitem>四个TAD ADD+STORE+COMMIT+FILL内部互联，每个连接到一个TAD，他们每个能访问1/4的L2缓存和DRAM</listitem>
+            <listitem>一个IOC总线来传输I/O加载请求和存储操作从核到IOB0</listitem>
+            <listitem>一个IOR总线来传输I/O加载请求从IOB0到核</listitem>
+        </itemizedlist>
+        <sect3>
+            <title>CMI ADD和TAD ADD总线</title>
+            CMI ADD和TAD ADD总线携带地址和控制信息来发起CMI事务。事务的源可能是一个核或一个IOB。
+            <para>
+                交叉横梁内部互联为了传递四个ADD总线中的一个到四个TAD ADD总线中的一个，并到TAD in-flight buffers.事务的DRAM地址选择TAD,它处理事务，适合于任何发起的ADD总线。四个aDD总线的任何能指导到任何TAD的事务。
+            </para>
+            <para>
+                一个到达一个ADD总线的事务首先就拿如QOS FIFO中目的TAD的一个。每个QOS FIFO能缓冲多达四个ADD总线事务在每个时钟周期。TAD QOS算法决定了进一步处理的地址的顺序。
+            </para>
+            <para>
+                一个crossbar round-robin调度器决定那个事务可能退出TAD QOS FIFOs。多达四个事务（从四个TADs的每个可能）竞争每个机器周期循环来L1D tag管道在交叉互联。L1D tag pipes有L1 数据缓存标签的副本（例如他们复制tags或DUTs）。L1D管道决定是否事务无效一个块的副本在L1数据缓存。如果crossbar甚至发送一个L1D缓存无效命令在COMMIT和FILL总线的事务。
+            </para>
+            <para>
+            </para>
+        </sect3>
     </sect2>
 </sect1>
 <sect1>
@@ -19,7 +47,7 @@
         <listitem>4MB</listitem>
         <listitem>16路集相连带128字节缓存块</listitem>
         <listitem>写回</listitem>
-        <listitem>片上数据和SECDED ECC标签</listitem>
+        <listitem>片上数据和标签被SECDED ECC保护</listitem>
     </itemizedlist>
     L2缓存被所有核和I/O模块共享,虽然它能通过使用特定CMI事物被返回并且能被分区。
     <sect2>
@@ -29,10 +57,91 @@
             <listitem>CMI接口有384位给数据传输</listitem>
             <listitem>本地内存控制(LMC)DRAM接口是256位宽</listitem>
             <listitem>内部L2缓存数据接口256位宽在每个</listitem>
-            <listitem></listitem>
-            <listitem></listitem>
-            <listitem></listitem>
-            <listitem></listitem>
         </itemizedlist>
     </sect2>
+    <sect2>
+        <title>L2 Cache Indexing (Set Selection)</title>
+        L2缓存有2048集合分别分布连接在四个TADs。每个集合包含16个128字节缓存块，每个一个有效路。每个L2/DRAM引用必须选择一个集合。
+        <para>
+            L2C实现两种集合索引算法，一种无别名算法(L2C_CTL[DISIDXALIAS]=1），和别名算法（L2C_CTL[DISIDXALIAS]=0）。别名算法被推荐。
+        </para>
+        <para>
+            无别名算法，index&lt;10：0&gt;=address&lt;17:7&gt;
+            这里地址是物理字节地址在L2/DRAM的位置
+        </para>
+        <para>
+            别名集合选择算法：额外位异或高位地址：index&lt;1:0&gt;=address&lt;8:7&gt; XOR address&lt;19:18&gt; XOR address&lt;13:12&gt;
+        </para>
+        <para>
+            index&lt;4:2&gt;=address&lt;11:9&gt; XOR address&lt;22:20&gt; XOR address&lt;14:12&gt;
+        </para>
+        <para>
+            index&lt;9:5&gt; = address&lt;16:12&gt; XOR address&lt;27:23&gt;
+        </para>
+        <para>
+            index&lt;10&gt; = address&lt;17&gt;
+        </para>
+        <para>
+            无别名和别名算法展开连续缓存块过连续集合。别名算法也展开不同高地址位缓存块过不同集合。大哥你没村地址不能严格连续或不能随机时有优势。
+        </para>
+        <para>
+            例如，如果包缓冲是2KB，并总是自然对齐，不但每个包缓冲的第一个256字节典型被使用，无别名算法只能使用两个集合在每个16之外，但是别名算法甚至贡献块跨所有集合，被踢共自然对齐2KB缓冲覆盖很多256KB对齐区域。
+            <note>L2C_CTL[DISIDXALIAS]值必须不能修改当L2缓存有数据时，他的值能安全被修改只有当L2缓存完全空时，例如在启动时间。</note>
+        </para>
+    </sect2>
+    <sect2>
+        <title>L2 TAD选择</title>
+        四个TADs是L2缓存。每个TAD保持1/4集合在缓存里。可选：无别名算法TAD = address&lt;8:7&gt; 别名算法：TAD = address&lt;8:7&gt; XOR address &lt;19:18&gt; XOR address&lt;13:12&gt;
+    </sect2>
+    <sect2>
+        <title>L2缓存替换和行分区</title>
+        L2C TADs实现他们的替换方案使用一个USED位每个L2缓存块。这里有16个USED位每个2048集合，每个行一个。所有16路通常可用。但是行分区能一处。
+        <para>
+            当一个TAD引用一个块，它设置这个块的USED位为1.当所有可用的路的USED位是1.TAD清除这个集合里所有可用的路的0，除了最后一个被引用的块。当一个TAD替换一个缓存块，它选择第一个可用路有一个USED位是0,并没有保持一个锁的块。如果USED位在一个集合里的所有可用路是全1在替换操作，TAD替换第一个路没有保持一个锁的块。
+        </para>
+        <para>
+            路分区能避免制定核或I/O设备污染L2缓存。十六个位MASK值配置路分区。共有34 16位[MASK]域给不同L2/DRAM事务的源在CMI：
+        </para>
+        <para>
+            32个给核：一个对应一个核（L2C_WPAR_PP(0..31)[MASK]）  两个给所有IOB发起的事务（L2C_WPAR_IOB0/1[MASK]）
+        </para>
+        <para>
+            当一个位被设置在mask域中的一个，一个内存命令发起从对应的核或IOB不能被选择替换的路。所有mask位置1是合法的，避免对应核或IOB替换L2块。
+        </para>
+    </sect2>
+    <sect2>
+        <title>Memory Input-Queue QOS</title>
+    </sect2>
+    <sect2>
+        <title>COMMIT and FILL Bus Arbitration</title>
+    </sect2>
+    <sect2>
+        <title>Core CP0寄存取访问</title>
+        L2C_COP0_MAP(0..8191,16128..16383)寄存器允许一些协处理器0寄存器值，额外调试信息像当前PC，从内部每个CPU核。L2C_COP0_MAP访问非常有用，包含：调试可观测，写访问到CPO PowThrottle寄存器，集中电源管理软件控制所有CPU的电源
+    </sect2>
+    <sect2>
+        <title>主内存L2/DRAM物理地址空间</title>
+        49位CN68XX物理地址空间，最低地址在这个49位空间有L2/DRAM地址。核和其它CN68XX单元带最低地址。提供多达128GB的L2/DRAM物理地址：DR0：0x0 0000 0000 0000到0x0 0000 0FFF FFFF = 低端256MB DDR3 SDRAM   DR1：0x0 0000 2000 0000到0x0 0020 0FFF FFFF = 高端127.75GB DDR3 SDRAM， 256MB只能DR0显示。更多256MB， DR0全部显示，低端部分DR1显示。
+        <para>
+            CN68XX有效置零L2/SDRAM地址位&lt;38&gt;和之上，别名不存在L2/DRAM地址在38位空间在38位L2/DRAM空间。
+        </para>
+    </sect2>
+    <sect2>
+        <title>L2C+LMC内部L2/DRAM地址空间</title>
+    </sect2>
+    <sect2>
+        <title>L2C虚拟化</title>
+    </sect2>
+    <sect2>
+        <title>L2缓存块锁定</title>
+    </sect2>
+    <sect2>
+        <title>L2缓存块刷新和解锁</title>
+    </sect2>
+    <sect2>
+        <title>L2C ECC代码</title>
+    </sect2>
+</sect1>
+<sect1>
+    <title>L2C寄存器</title>
 </sect1>
